@@ -1,10 +1,11 @@
 package com.example.jobdetailsscreen
 
+import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.annotation.ColorRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -23,17 +24,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -45,34 +43,36 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.runtime.*
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
-import com.example.jobdetailsscreen.ui.theme.JobDetailsScreenTheme
+import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            JobDetailsScreenTheme {
-                JobDetailsScreen()
-            }
+            JobDetailsScreen()
         }
     }
 }
-
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = true)
@@ -91,12 +91,7 @@ fun JobDetailsScreen() {
                             modifier = Modifier.size(28.dp), tint= Color.White)
                     }
                 },
-                actions = {
-                    IconButton(onClick = { /* TODO: Share action */ }) {
-                        Icon(Icons.Default.Share, contentDescription = "Share",
-                            modifier = Modifier.size(28.dp), tint= Color.White )
-                    }
-                },
+
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = colorResource(id= R.color.teal_700),
                     titleContentColor = Color.White,
@@ -119,8 +114,7 @@ fun JobDetailsContent() {
         modifier = Modifier
             .fillMaxSize()
             .background(Color.Black)
-    )
-    {
+    ) {
         Column (
             modifier = Modifier
                 .fillMaxSize()
@@ -142,11 +136,10 @@ fun JobDetailsContent() {
                 Column(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally
-                )
-                {
+                ) {
                     Text(
                         text = "TestSoft",
-                        color = Color.Gray,
+                        color = Color.White,
                         textAlign = TextAlign.Center,
                         modifier = Modifier
                             .fillMaxWidth()
@@ -155,8 +148,7 @@ fun JobDetailsContent() {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.align(Alignment.CenterHorizontally)
-                    )
-                    {
+                    ) {
                         Icon(
                             imageVector = Icons.Default.LocationOn,
                             contentDescription = "Location Icon",
@@ -166,24 +158,32 @@ fun JobDetailsContent() {
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = "Los Angeles, USA",
-                            color = Color.Gray,
+                            color = Color.White,
                             fontSize = 14.sp
                         )
                     }
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    Text(
+                        text = "Created 2 days ago",
+                        color = Color.Gray,
+                        fontSize = 10.sp
+                    )
                     Spacer(modifier = Modifier.height(10.dp))
                     Row(
                         Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         InfoCard(
-                            "Salary (Monthly)",
-                            "$8.000",
-                            Icons.Default.Lock,
+                            "Salary",
+                            "$5.000 - $7.000",
+                            R.drawable.dollar,
                             Modifier.height(50.dp)
                         )
                         InfoCard(
-                            "Job Type", "Full-Time",
-                            Icons.Default.ShoppingCart,
+                            "Category",
+                            "IT",
+                            R.drawable.work,
                             Modifier.fillMaxWidth(1f)
                         )
                     }
@@ -193,15 +193,14 @@ fun JobDetailsContent() {
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         InfoCard(
-                            "Work Place",
-                            "Remote",
-                            Icons.Default.Home,
+                            "Contract Time",
+                            "Full-time",
+                            R.drawable.work,
                             Modifier.fillMaxWidth(1f)
                         )
                         InfoCard(
-                            "Level",
-                            "Internship",
-                            Icons.Default.Person,
+                            "Contract Type" , "Permanent",
+                            R.drawable.work,
                             Modifier.fillMaxWidth(1f)
                         )
                     }
@@ -215,24 +214,21 @@ fun JobDetailsContent() {
             onClick = { /* TODO: Apply Action */ },
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .fillMaxWidth()
-                .padding(16.dp),
+                .fillMaxWidth().height(90.dp)
+                .padding(20.dp),
             shape = RoundedCornerShape(12.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF018786))
-            )
-        {
-            Text("Apply for job", color = Color.White)
+        ) {
+            Text("Apply for job", fontSize = 20.sp, color = Color.White)
         }
     }
 }
 
-
-
 @Composable
-fun InfoCard(title: String, value: String, icon: ImageVector, modifier: Modifier) {
+fun InfoCard(title: String, value: String, icon: Int, modifier: Modifier) {
     Card(
         modifier = Modifier
-            .width(170.dp)
+            .width(200.dp)
             .height(100.dp)
             .padding(2.dp),
         colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E1E)),
@@ -243,21 +239,25 @@ fun InfoCard(title: String, value: String, icon: ImageVector, modifier: Modifier
             modifier = Modifier.padding(20.dp),
             verticalArrangement = Arrangement.Center
         ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = colorResource(id = R.color.orange),
-                modifier = Modifier.size(14.dp)
+            Row {
+                Icon(
+                    imageVector = ImageVector.vectorResource(id = icon),
+                    contentDescription = null,
+                    tint = colorResource(id = R.color.orange),
+                    modifier = Modifier.size(18.dp)
 
-            )
-            Text(
-                text = title,
-                fontSize = 15.sp,
-                color = colorResource(id = R.color.teal_700)
-            )
+                )
+                Spacer(modifier = Modifier.width(5.dp))
+                Text(
+                    text = title,
+                    fontSize = 15.sp,
+                    color = colorResource(id = R.color.teal_700)
+                )
+            }
+            Spacer(modifier = Modifier.height(10.dp))
             Text(
                 text = value,
-                fontSize = 14.sp,
+                fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.White
             )
@@ -268,11 +268,12 @@ fun InfoCard(title: String, value: String, icon: ImageVector, modifier: Modifier
 @Composable
 fun TabSection() {
     var selectedTab by remember { mutableStateOf(0) }
-    val tabTitles = listOf("About", "Company", "Review")
+    val tabTitles = listOf("Description")
 
     Column(modifier = Modifier.fillMaxWidth()) {
         TabRow(
             selectedTabIndex = selectedTab,
+            Modifier.height(80.dp),
             containerColor = Color.Black,
             contentColor = colorResource(id = R.color.teal_700)
         ) {
@@ -294,46 +295,23 @@ fun TabSection() {
         when (selectedTab) {
             0 -> {
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    Text(
-                        text = "About the job",
-                        color = Color.White,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Text(
-                        text = "We are looking for a talented and motivated hire to join our team. As a developer on this program you'll work on new features and we'll be responsible for this job.",
-                        color = Color.White,
-                        fontSize = 14.sp,
-                        lineHeight = 20.sp
-                    )
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
                         text = "Job Description",
                         color = Color.White,
-                        fontSize = 16.sp,
+                        fontSize = 20.sp,
                         fontWeight = FontWeight.Bold
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "We are looking for a talented and motivated hire to join our team.",
+                        text = "We are looking for a talented and motivated hire to join our team. As a developer on this program you'll work on new features and we'll be responsible for this job.",
                         color = Color.White,
-                        fontSize = 14.sp,
-                        lineHeight = 20.sp
+                        fontSize = 18.sp,
+                        lineHeight = 30.sp
                     )
                 }
             }
         }
     }
 }
-
-
-
-
-
-
-
-
 

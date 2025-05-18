@@ -1,4 +1,4 @@
-package com.example.jobdetailsscreen.ui.theme
+package com.example.jobsearchapplication.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
